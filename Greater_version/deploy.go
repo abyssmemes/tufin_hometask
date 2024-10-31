@@ -1,5 +1,3 @@
-// deploy.go
-
 package main
 
 import (
@@ -27,47 +25,31 @@ func runDeployCmd(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// Deploy MySQL
-	fmt.Println("Deploying MySQL...")
-	if err := deployMySQL(clientset, config); err != nil {
-		fmt.Printf("Failed to deploy MySQL: %v\n", err)
-	} else {
-		fmt.Println("MySQL deployed successfully.")
-	}
+	// List of applications to deploy
+	applications := []string{"mysql", "wordpress"}
 
-	// Deploy WordPress
-	fmt.Println("Deploying WordPress...")
-	if err := deployWordPress(clientset, config); err != nil {
-		fmt.Printf("Failed to deploy WordPress: %v\n", err)
-	} else {
-		fmt.Println("WordPress deployed successfully.")
+	// Loop over applications and deploy each one
+	for _, app := range applications {
+		fmt.Printf("Deploying %s...\n", app)
+		if err := deploy(clientset, config, app); err != nil {
+			fmt.Printf("Failed to deploy %s: %v\n", app, err)
+		} else {
+			fmt.Printf("%s deployed successfully.\n", app)
+		}
 	}
 
 	fmt.Println("Deployment completed.")
 }
 
-func deployMySQL(clientset *kubernetes.Clientset, config *rest.Config) error {
-	deploymentPath := filepath.Join("deployments", "mysql-deployment.yaml")
-	servicePath := filepath.Join("deployments", "mysql-service.yaml")
+func deploy(clientset *kubernetes.Clientset, config *rest.Config, appName string) error {
+	deploymentPath := filepath.Join("deployments", fmt.Sprintf("%s-deployment.yaml", appName))
+	servicePath := filepath.Join("deployments", fmt.Sprintf("%s-service.yaml", appName))
 
 	if err := applyYAML(config, deploymentPath); err != nil {
-		return err
+		return fmt.Errorf("error applying deployment YAML for %s: %v", appName, err)
 	}
 	if err := applyYAML(config, servicePath); err != nil {
-		return err
-	}
-	return nil
-}
-
-func deployWordPress(clientset *kubernetes.Clientset, config *rest.Config) error {
-	deploymentPath := filepath.Join("deployments", "wordpress-deployment.yaml")
-	servicePath := filepath.Join("deployments", "wordpress-service.yaml")
-
-	if err := applyYAML(config, deploymentPath); err != nil {
-		return err
-	}
-	if err := applyYAML(config, servicePath); err != nil {
-		return err
+		return fmt.Errorf("error applying service YAML for %s: %v", appName, err)
 	}
 	return nil
 }
