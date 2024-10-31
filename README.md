@@ -1,90 +1,107 @@
-Tufin Go Client - README.md
+# Tufin Go Client
 
-Introduction
+**Tufin** is a Go-based command-line client designed to simplify the deployment and management of a local Kubernetes cluster and applications. It provides the following functionalities:
 
-Tufin is a Go-based command-line client designed to simplify the deployment and management of a local Kubernetes cluster and applications. It provides the following functionalities:
+- **Cluster Deployment**: Deploy a local Kubernetes cluster using either **k3s** or **minikube**.
+- **Application Deployment**: Deploy MySQL and WordPress pods connected together within the cluster.
+- **Status Monitoring**: Check the status of the deployed pods in the default namespace.
 
-	•	Cluster Deployment: Deploy a local Kubernetes cluster using either k3s or minikube.
-	•	Application Deployment: Deploy MySQL and WordPress pods connected together within the cluster.
-	•	Status Monitoring: Check the status of the deployed pods in the default namespace.
+**Note**: Adding **minikube** support was essential for testing on macOS, as installing and running **k3s** directly on macOS is not straightforward and often requires additional tools like virtual machines or Docker Desktop.
 
-Note: Adding minikube support was essential for testing on macOS, as installing and running k3s directly on macOS is not straightforward and often requires additional tools like virtual machines or Docker Desktop.
+---
 
-Table of Contents
+## Table of Contents
 
-	•	Prerequisites
-	•	Installation
-	•	Commands Overview
-	•	tufin cluster
-	•	tufin deploy
-	•	tufin status
-	•	Usage Instructions
-	•	Deploying a Kubernetes Cluster
-	•	Deploying Applications
-	•	Checking Pod Status
-	•	Accessing WordPress Application
-	•	Code Structure and Explanation
-	•	Troubleshooting
-	•	Conclusion
-	•	References
-
-Prerequisites
-
-Before using the tufin client, ensure you have the following installed on your system:
-
-	•	Go Programming Language: Install Go
-	•	Git: Install Git
-	•	kubectl (optional): For verifying cluster status and debugging.
-	•	Docker: Required for pulling container images and running containers.
-
-Installation
-
-	1.	Clone the Repository:
-
-git clone https://github.com/yourusername/tufin.git
-cd tufin
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Commands Overview](#commands-overview)
+    - [`tufin cluster`](#tufin-cluster)
+    - [`tufin deploy`](#tufin-deploy)
+    - [`tufin status`](#tufin-status)
+- [Usage Instructions](#usage-instructions)
+    - [Deploying a Kubernetes Cluster](#deploying-a-kubernetes-cluster)
+        - [Option 1: Deploying a k3s Cluster (Default)](#option-1-deploying-a-k3s-cluster-default)
+        - [Option 2: Deploying a Minikube Cluster](#option-2-deploying-a-minikube-cluster)
+    - [Deploying Applications](#deploying-applications)
+    - [Checking Pod Status](#checking-pod-status)
+- [Code Structure and Explanation](#code-structure-and-explanation)
+- [References](#references)
 
 
-	2.	Install Dependencies:
+---
+
+## Prerequisites
+
+Before using the **tufin** client, ensure you have the following installed on your system:
+
+- **Go Programming Language**: [Install Go](https://golang.org/dl/)
+- **Git**: [Install Git](https://git-scm.com/downloads)
+- **Docker**: Required for pulling container images and running containers.
+- **kubectl** (optional): For verifying cluster status and debugging.
+- **k3s** Cluster tool.
+- **minikube** Alternative Cluster tool.
+---
+
+## Installation
+
+1. **Clone the Repository**:
+
+```bash
+   git clone https://github.com/abyssmemes/tufin_hometask.git
+   cd tufin
+```
+
+2.	**Install Dependencies**:
+
 Ensure you have the necessary Go packages:
 
-go get github.com/spf13/cobra@v1.6.1
-go get k8s.io/client-go@v0.27.4
+```bash
+    go get github.com/spf13/cobra@v1.6.1
+    go get k8s.io/client-go@v0.27.4
+```
 
+3.	**Build the Executable**:
 
-	3.	Build the Executable:
 Compile the code to create the tufin executable:
+```bash
+   go build -o tufin main.go
+```
 
-go build -o tufin main.go
 
-
-
-Commands Overview
+## Commands Overview
 
 The tufin client provides three main commands:
-
+```bash
 tufin cluster
-
+```
 Usage: tufin cluster [minikube]
 
-	•	Description: Deploys a local Kubernetes cluster.
-	•	Options:
-	•	No arguments: Deploys a k3s cluster (default).
-	•	minikube: Deploys a minikube cluster.
+**Description**: Deploys a local Kubernetes cluster.
 
+**Options**:
+
+No arguments: Deploys a k3s cluster (default).
+
+minikube: Deploys a minikube cluster.
+
+
+```bash
 tufin deploy
-
+```
 Usage: tufin deploy
 
-	•	Description: Deploys MySQL and WordPress pods into the cluster, connecting WordPress to MySQL.
-
+**Description**: 
+    Deploys MySQL and WordPress pods into the cluster, connecting WordPress to MySQL.
+```bash
 tufin status
-
+```
 Usage: tufin status
 
-	•	Description: Prints a status table containing the pod names and their current status in the default namespace.
+**Description**: Prints a status table containing the pod names and their current status in the default namespace.
 
-Usage Instructions
+
+
+## Usage Instructions
 
 Deploying a Kubernetes Cluster
 
@@ -130,186 +147,227 @@ To check the status of the deployed pods:
 
 ./tufin status
 
-	•	Description:
+	Description:
 	•	Lists all pods in the default namespace along with their current status (e.g., Running, Pending).
-	•	Example Output:
-
+Example Output:
+```bash
 Getting pod status in default namespace...
 Pod Name                       Status
 mysql-xxxxxxxxxx-xxxxx         Running
 wordpress-xxxxxxxxxx-xxxxx     Running
+```
 
 
 
-Accessing WordPress Application
 
-Since the WordPress service is exposed via a NodePort, you can access it using the node’s IP address and the assigned port.
+## Code Structure and Explanation
 
-	1.	Find the NodePort:
+### Overview
 
-kubectl get svc wordpress
+Code Overview
 
-Example Output:
+Structure
 
-NAME        TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
-wordpress   NodePort   10.96.122.88   <none>        80:30080/TCP   5m
+The tufin client is written in Go and leverages the following key libraries:
 
-	•	NodePort: In this example, 30080.
+	•	Cobra: For building command-line interfaces (CLI). It simplifies the creation and organization of commands and subcommands.
+	•	client-go: The official Kubernetes client library for Go. It enables interaction with Kubernetes clusters through the Kubernetes API.
 
-	2.	Access WordPress:
-	•	Open a web browser and navigate to http://<NODE_IP>:<NODE_PORT>.
-	•	For a local cluster:
-	•	k3s: Use localhost or 127.0.0.1.
-	•	minikube: Run minikube ip to get the IP address.
-	•	Example: http://localhost:30080 or http://<minikube-ip>:30080.
+The main components of the code are:
 
-Code Structure and Explanation
-
-Overview
-
-The tufin client is structured using the Cobra library for command-line interfaces in Go. It uses the Kubernetes client-go library to interact with the Kubernetes cluster.
+	•	main.go: The primary Go file containing the implementation of the commands and the core logic of the client.
 
 Main Components
 
-	•	main.go: The primary Go file containing the implementation of the commands.
+1. Import Statements
 
+At the beginning of the main.go file, necessary packages are imported, including standard Go packages and external libraries:
+```bash
+import (
+"context"
+"fmt"
+"os"
+"os/exec"
+"path/filepath"
+"runtime"
+"strings"
+"time"
+
+    "github.com/spf13/cobra"
+    appsv1 "k8s.io/api/apps/v1"
+    corev1 "k8s.io/api/core/v1"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "k8s.io/client-go/kubernetes"
+    "k8s.io/client-go/tools/clientcmd"
+    "k8s.io/client-go/util/homedir"
+)
+```
+2. Helper Functions
+```bash
+int32Ptr
+```
+A helper function to get a pointer to an int32 value, which is required by certain Kubernetes API fields.
+```bash
+func int32Ptr(i int32) *int32 { return &i }
+```
+3. Main Function
+
+The main function initializes the root command and adds subcommands for cluster management, deployment, and status checking.
+```bash
+func main() {
+var rootCmd = &cobra.Command{Use: "tufin"}
+
+    rootCmd.AddCommand(clusterCmd)
+    rootCmd.AddCommand(deployCmd)
+    rootCmd.AddCommand(statusCmd)
+
+    if err := rootCmd.Execute(); err != nil {
+        fmt.Println(err)
+        os.Exit(1)
+    }
+}
+```
 Commands
 
-	1.	Cluster Command (tufin cluster [minikube]):
+1. clusterCmd Command
+
+Purpose
+
+Deploys a local Kubernetes cluster using either k3s (default) or minikube if specified.
+
+Usage
+
+tufin cluster [minikube]
+
+Implementation Details
+
+	•	Argument Parsing: Checks if the optional argument minikube is provided.
+	•	Cluster Deployment:
+	•	If minikube is specified, calls deployMinikubeCluster().
+	•	Otherwise, defaults to deploying a k3s cluster via deployK3sCluster().
+
+Functions
+
+deployK3sCluster
+
+	•	Checks for k3s Installation:
+	•	Uses exec.LookPath("k3s") to check if k3s is installed.
+	•	If not installed, calls installK3s().
+	•	Installs k3s:
+	•	The installK3s function runs the k3s installation script for Linux.
+	•	Starts k3s Server:
+	•	Runs sudo k3s server with flags to write the kubeconfig file to ~/.kube/config.
+	•	Uses time.Sleep to wait for the server to be ready.
+
+deployMinikubeCluster
+
+	•	Checks for minikube Installation:
+	•	Uses exec.LookPath("minikube") to check if minikube is installed.
+	•	If not installed, calls installMinikube().
+	•	Installs minikube:
+	•	The installMinikube function handles installation for different operating systems:
+	•	Linux: Downloads the minikube binary and installs it to /usr/local/bin/.
+	•	macOS: Installs minikube via Homebrew.
+	•	Starts minikube:
+	•	Runs minikube start to initialize the cluster.
+
+installK3s
+
 	•	Functionality:
-	•	Checks if the chosen Kubernetes distribution (k3s or minikube) is installed.
-	•	If not installed, attempts to install it automatically.
-	•	Starts the cluster.
-	•	Implementation Details:
-	•	k3s:
-	•	Installation: Uses the official installation script for Linux.
-	•	Startup: Runs sudo k3s server with appropriate flags.
-	•	minikube:
-	•	Installation:
-	•	Linux: Downloads the minikube binary and installs it.
-	•	macOS: Installs via Homebrew.
-	•	Startup: Runs minikube start.
-	2.	Deploy Command (tufin deploy):
+	•	Downloads and runs the official k3s installation script for Linux.
+	•	Operating System Support:
+	•	Only supports Linux.
+	•	For other operating systems, prompts the user to install k3s manually.
+
+installMinikube
+
 	•	Functionality:
-	•	Connects to the cluster using the kubeconfig file.
-	•	Deploys a MySQL deployment and service.
-	•	Deploys a WordPress deployment and service, with environment variables set to connect to MySQL.
-	•	Implementation Details:
-	•	Uses client-go to create Kubernetes resources programmatically.
-	•	Sets up necessary environment variables and ports.
-	3.	Status Command (tufin status):
-	•	Functionality:
-	•	Lists all pods in the default namespace and displays their status.
-	•	Implementation Details:
-	•	Uses client-go to list pods and formats the output.
+	•	Installs minikube based on the operating system.
+	•	Operating System Support:
+	•	Linux: Downloads the minikube binary.
+	•	macOS: Uses Homebrew to install minikube.
+	•	Windows: Prompts the user to install minikube manually.
 
-Adding Minikube for macOS Testing
+2. deployCmd Command
 
-	•	Reason:
-	•	k3s installation and operation on macOS is not straightforward and often requires additional tools like virtual machines.
-	•	Minikube provides an easy-to-use solution for running Kubernetes locally on macOS.
-	•	Implementation:
-	•	Modified the cluster command to accept an optional [minikube] argument.
-	•	Added functions to handle the installation and startup of minikube.
-	•	Adjusted the script to ensure compatibility with both k3s and minikube clusters.
+Purpose
 
-Troubleshooting
+Deploys MySQL and WordPress pods into the cluster, setting up WordPress to connect to MySQL.
 
-Common Issues
+Usage
 
-	1.	Permission Denied Errors:
-	•	Cause: Lack of administrative privileges during installation or startup.
-	•	Solution:
-	•	Run the commands with sudo if necessary.
-	•	Ensure your user account has the required permissions.
-	2.	kubeconfig Not Found:
-	•	Cause: The kubeconfig file is not located at ~/.kube/config.
-	•	Solution:
-	•	Verify the location of your kubeconfig file.
-	•	Set the KUBECONFIG environment variable if it’s in a different location.
-	•	Modify the code to point to the correct path.
-	3.	Cluster Not Starting:
-	•	Cause: Conflicts with existing clusters or issues with the Kubernetes distribution.
-	•	Solution:
-	•	For k3s:
-	•	Run sudo k3s-uninstall.sh to remove any existing k3s installations.
-	•	For minikube:
-	•	Run minikube delete to remove any existing clusters.
-	•	Retry starting the cluster.
-	4.	Pods Not Running:
-	•	Cause: Issues with the deployment or insufficient resources.
-	•	Solution:
-	•	Check pod logs using kubectl logs.
-	•	Ensure your system has enough resources (CPU, RAM).
-	•	Verify that the images are correctly pulled from the registry.
-	5.	Cannot Access WordPress Application:
-	•	Cause: Networking issues or incorrect NodePort.
-	•	Solution:
-	•	Ensure the service is correctly exposed and note the correct NodePort.
-	•	If using minikube, ensure you are using the correct minikube IP (minikube ip).
-	6.	Failed to Pull Docker Images:
-	•	Error Message:
+tufin deploy
 
-stream logs failed container "mysql" in pod "mysql-xxxxxxxxx-xxxxx" is waiting to start: trying and failing to pull image for default/mysql-xxxxxxxxx-xxxxx (mysql)
+Implementation Details
 
+	•	Kubeconfig Handling:
+	•	Determines the path to the kubeconfig file, defaulting to ~/.kube/config.
+	•	Clientset Creation:
+	•	Builds a Kubernetes client configuration and creates a clientset for interacting with the cluster.
+	•	Deployment of Resources:
+	•	MySQL Deployment:
+	•	Creates a Deployment for MySQL with one replica.
+	•	Uses the image mysql:5.6.
+	•	Sets the MYSQL_ROOT_PASSWORD environment variable.
+	•	Exposes port 3306.
+	•	MySQL Service:
+	•	Creates a Service to expose the MySQL deployment internally.
+	•	WordPress Deployment:
+	•	Creates a Deployment for WordPress with one replica.
+	•	Uses the image wordpress:4.8-apache.
+	•	Sets environment variables to connect to MySQL (WORDPRESS_DB_HOST, WORDPRESS_DB_PASSWORD).
+	•	Exposes port 80.
+	•	WordPress Service:
+	•	Creates a Service of type NodePort to expose WordPress externally.
+	•	Error Handling:
+	•	Checks for errors during resource creation and prints informative messages.
 
-	•	Cause: Kubernetes is unable to pull the required Docker images.
-	•	Solutions:
-	•	Verify Image Reference:
-	•	Ensure the image name is correct. The MySQL image used is mysql:5.6.
-	•	Check Network Connectivity:
-	•	Ensure your nodes have internet access to pull images from Docker Hub.
-	•	Set Image Pull Policy:
-	•	Modify the deployment to set imagePullPolicy: Always.
-	•	Use Image Pull Secrets:
-	•	Create a Docker Hub account and create a Kubernetes secret:
+3. statusCmd Command
 
-kubectl create secret docker-registry regcred \
---docker-server=https://index.docker.io/v1/ \
---docker-username=your-username \
---docker-password=your-password \
---docker-email=your-email
+Purpose
 
+Prints out a status table containing the pod names and their status in the default namespace.
 
-	•	Update the deployment to use the secret:
+Usage
 
-Spec: corev1.PodSpec{
-ImagePullSecrets: []corev1.LocalObjectReference{
-{
-Name: "regcred",
-},
-},
-Containers: []corev1.Container{
-// ...
-},
-},
+tufin status
 
+Implementation Details
 
-	•	Alternative Registries:
-	•	Use images from alternative registries if Docker Hub is inaccessible.
+	•	Kubeconfig Handling:
+	•	Same as in deployCmd.
+	•	Clientset Creation:
+	•	Same as in deployCmd.
+	•	Listing Pods:
+	•	Retrieves a list of pods in the default namespace.
+	•	Iterates over the pods and prints their names and status phases in a formatted table.
 
-Conclusion
+Additional Details
 
-The tufin Go client provides a simple and efficient way to:
+Handling Image Pull Issues
 
-	•	Deploy a local Kubernetes cluster using k3s or minikube.
-	•	Deploy MySQL and WordPress applications within the cluster.
-	•	Monitor the status of your deployments.
+	•	ImagePullPolicy:
+	•	By default, the image pull policy is IfNotPresent.
+	•	To ensure the latest image is pulled, you can set ImagePullPolicy: corev1.PullAlways in the container specification.
+	•	Image Pull Secrets:
+	•	If encountering Docker Hub rate limits or authentication issues, you can create an image pull secret and attach it to the pod specification.
 
-Adding minikube support was essential for testing on macOS, given the complexities involved with installing and running k3s directly on macOS systems. Minikube offers a more accessible and user-friendly approach for macOS users, ensuring that the tufin client remains versatile and adaptable across different operating systems.
+Adding Minikube Support
 
-Feel free to customize and extend the client to suit your specific needs. Contributions and improvements are welcome!
+	•	Rationale:
+	•	Installing and running k3s directly on macOS is complex due to the lack of native support and the need for virtualization.
+	•	Minikube provides an easier alternative for macOS users, enabling them to run Kubernetes locally without extensive setup.
+	•	Adjustments Made:
+	•	The cluster command accepts an optional [minikube] argument to specify the use of minikube.
+	•	Added functions installMinikube and deployMinikubeCluster to handle minikube installation and cluster setup.
+	•	The code ensures compatibility with both k3s and minikube clusters by adjusting paths and commands accordingly.
 
-References
+Error Handling and Logging
 
-	•	Go Programming Language: https://golang.org
-	•	Cobra Library: https://github.com/spf13/cobra
-	•	Kubernetes Client-Go: https://github.com/kubernetes/client-go
-	•	k3s Documentation: https://docs.k3s.io
-	•	Minikube Documentation: https://minikube.sigs.k8s.io/docs/
-	•	kubectl Tool: https://kubernetes.io/docs/tasks/tools/
-	•	Docker Hub Rate Limits: https://www.docker.com/increase-rate-limits
-	•	Go exec Package: https://pkg.go.dev/os/exec
-	•	Go runtime Package: https://pkg.go.dev/runtime
+	•	Command Existence Checks:
+	•	Uses exec.LookPath to verify if required binaries (k3s, minikube) are installed before attempting to use them.
+	•	Context Handling:
+	•	Uses context.TODO() as a placeholder context for Kubernetes API calls.
+	•	Exiting on Errors:
+	•	The program exits with a non-zero status code if critical errors occur, ensuring that failures are communicated effectively.
 
-Feel free to reach out if you have any questions or need further assistance!
